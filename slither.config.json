@@ -1,0 +1,5 @@
+{
+  "detectors_to_exclude": "timestamp,assembly",
+  "filter_paths": "contracts/mocks,contracts-exposed,node_modules",
+  "compile_force_framework": "hardhat"
+}

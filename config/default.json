@@ -1,0 +1,127 @@
+{
+  "INFURA_KEY": "0123456789ABCDEFGHIJKLMNOPQRSTUVWX",
+  "DEPLOYER_KEY": "0123456789363552ea583b7ce9ab23d230f65d39e6d4d4898e841f0f304372ea",
+  "OPERATOR_KEY": "0123456789363552ea583b7ce9ab23d230f65d39e6d4d4898e841f0f304372ea",
+  "GAS_PRICE": "auto",
+  "LOGGING": true,
+  "DEPLOY": {
+    "UNISWAP_V2_ROUTER": "0x7a250d5630b4cf539739df2c5dacb4c659f2488d",
+    "USDT_ADDRESS": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+    "MEDX_TOKEN": {
+      "ADDRESS": null,
+      "OWNER": null,
+      "FEE_RECEIVER": null
+    },
+    "VESTING": {
+      "RESERVE_BATCH_SIZE": 10,
+      "DEFAULT_PERIOD_SIZE": 2592000,
+      "DEFAULT_ACCOUNT": "0x2145459993d506b8b236d13044b973711fb3320a",
+      "LIST": [
+        {
+          "NAME": "Liquidity",
+          "CLIFF": 0,
+          "VESTING_PERIODS": 12,
+          "INITIAL_RELEASE_X18": "200000000000000000",
+          "RESERVES": "5000000000000000000000000000"
+        },
+        {
+          "NAME": "Founders",
+          "CLIFF": 3,
+          "VESTING_PERIODS": 12,
+          "INITIAL_RELEASE_X18": "100000000000000000",
+          "RESERVES": "3500000000000000000000000000"
+        },
+        {
+          "NAME": "Staking",
+          "CLIFF": 0,
+          "VESTING_PERIODS": 0,
+          "INITIAL_RELEASE_X18": "1000000000000000000",
+          "RESERVES": "4000000000000000000000000000"
+        },
+        {
+          "NAME": "Community Foundation",
+          "CLIFF": 1,
+          "VESTING_PERIODS": 12,
+          "INITIAL_RELEASE_X18": 0,
+          "RESERVES": "2500000000000000000000000000"
+        },
+        {
+          "NAME": "Marketing & Ecosystem",
+          "CLIFF": 0,
+          "VESTING_PERIODS": 12,
+          "INITIAL_RELEASE_X18": "83333333333333333",
+          "RESERVES": "2500000000000000000000000000"
+        },
+        {
+          "NAME": "Advisors",
+          "CLIFF": 3,
+          "VESTING_PERIODS": 12,
+          "INITIAL_RELEASE_X18": 0,
+          "RESERVES": "1000000000000000000000000000"
+        },
+        {
+          "NAME": "Collaborators / Alliances",
+          "CLIFF": 3,
+          "VESTING_PERIODS": 12,
+          "INITIAL_RELEASE_X18": 0,
+          "RESERVES": "1000000000000000000000000000"
+        },
+        {
+          "NAME": "Reserves",
+          "CLIFF": 6,
+          "VESTING_PERIODS": 12,
+          "INITIAL_RELEASE_X18": 0,
+          "RESERVES": "1500000000000000000000000000"
+        },
+        {
+          "NAME": "Private Sale #1",
+          "CLIFF": 3,
+          "VESTING_PERIODS": 9,
+          "INITIAL_RELEASE_X18": "100000000000000000",
+          "RESERVES": "1000000000000000000000000000"
+        },
+        {
+          "NAME": "Private Sale #2",
+          "CLIFF": 3,
+          "VESTING_PERIODS": 9,
+          "INITIAL_RELEASE_X18": "100000000000000000",
+          "RESERVES": "1000000000000000000000000000"
+        },
+        {
+          "NAME": "Private Sale #3",
+          "CLIFF": 3,
+          "VESTING_PERIODS": 9,
+          "INITIAL_RELEASE_X18": "100000000000000000",
+          "RESERVES": "2000000000000000000000000000"
+        }
+      ]
+    }
+  },
+  "SCRIPTS": {},
+  "EXPLORER_API_KEY": {
+    "ETHERSCAN": "0123456789ABCDEFGHIJKLMNOPQRSTUVWX",
+    "POLYGONSCAN": "0123456789ABCDEFGHIJKLMNOPQRSTUVWX",
+    "BSCSCAN": "0123456789PHH9DHM9P438C7S39S37CWCV"
+  },
+  "FORK": {
+    "ENABLED": false,
+    "PROVIDER_URI": ""
+  },
+  "GAS_REPORTER": {
+    "ENABLED": false,
+    "COINMARKETCAP": "",
+    "CURRENCY": "USD",
+    "TOKEN": "ETH",
+    "GAS_PRICE_API": "https://api.etherscan.io/api?module=proxy&action=eth_gasPrice"
+  },
+  "DOCGEN": {
+    "OUT_DIR": "./docs",
+    "CLEAR": true,
+    "RUN_ON_COMPILE": false
+  },
+  "CONTRACTS_EXPOSED": {
+    "IMPORTS": false,
+    "INITIALIZERS": true,
+    "EXCLUDE": []
+  }
+}

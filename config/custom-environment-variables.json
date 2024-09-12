@@ -1,0 +1,48 @@
+{
+  "INFURA_KEY": "INFURA_KEY",
+  "DEPLOYER_KEY": "DEPLOYER_KEY",
+  "OPERATOR_KEY": "OPERATOR_KEY",
+  "GAS_PRICE": "GAS_PRICE",
+  "LOGGING": { "__name": "LOGGING", "__format": "boolean" },
+  "DEPLOY": {
+    "UNISWAP_V2_ROUTER": "UNISWAP_V2_ROUTER",
+    "USDT_ADDRESS": "USDT_ADDRESS",
+    "MEDX_TOKEN": {
+      "ADDRESS": "MEDX_TOKEN_ADDRESS",
+      "OWNER": "MEDX_TOKEN_OWNER",
+      "FEE_RECEIVER": "MEDX_TOKEN_FEE_RECEIVER"
+    },
+    "VESTING": {
+      "RESERVE_BATCH_SIZE": "VESTING_RESERVE_BATCH_SIZE",
+      "DEFAULT_PERIOD_SIZE": "VESTING_DEFAULT_PERIOD_SIZE",
+      "DEFAULT_ACCOUNT": "VESTING_DEFAULT_ACCOUNT"
+    }
+  },
+  "SCRIPTS": {},
+  "EXPLORER_API_KEY": {
+    "ETHERSCAN": "EXPLORER_API_KEY_ETHERSCAN",
+    "POLYGONSCAN": "EXPLORER_API_KEY_POLYGONSCAN",
+    "BSCSCAN": "EXPLORER_API_KEY_BSCSCAN"
+  },
+  "FORK": {
+    "ENABLED": { "__name": "FORK_ENABLED", "__format": "boolean" },
+    "PROVIDER_URI": "FORK_PROVIDER_URI"
+  },
+  "GAS_REPORTER": {
+    "ENABLED": { "__name": "GAS_REPORTER_ENABLED", "__format": "boolean" },
+    "COINMARKETCAP": "GAS_REPORTER_COINMARKETCAP",
+    "CURRENCY": "GAS_REPORTER_CURRENCY",
+    "TOKEN": "GAS_REPORTER_TOKEN",
+    "GAS_PRICE_API": "GAS_REPORTER_GAS_PRICE_API"
+  },
+  "DOCGEN": {
+    "OUT_DIR": "DOCGEN_OUT_DIR",
+    "CLEAR": { "__name": "DOCGEN_CLEAR", "__format": "boolean" },
+    "RUN_ON_COMPILE": { "__name": "DOCGEN_RUN_ON_COMPILE", "__format": "boolean" }
+  },
+  "CONTRACTS_EXPOSED": {
+    "IMPORTS": { "__name": "CONTRACTS_EXPOSED_IMPORTS", "__format": "boolean" },
+    "INITIALIZERS": { "__name": "CONTRACTS_EXPOSED_INITIALIZERS", "__format": "boolean" },
+    "EXCLUDE": "CONTRACTS_EXPOSED_EXCLUDE"
+  }
+}
