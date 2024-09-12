@@ -68,8 +68,7 @@ contract MedXToken is IMedXToken, ERC20Burnable, Ownable2Step, ReentrancyGuard {
         address usdtUniV2Pair = factory.createPair(self, usdt);
         _updateTaxedList(wethUniV2Pair, true);
         _updateTaxedList(usdtUniV2Pair, true);
-        _approve(self, wethUniV2Pair, type(uint256).max);
-        _approve(self, usdtUniV2Pair, type(uint256).max);
+        _approve(self, address(_uniV2Router), type(uint256).max);
     }
 
     // #region PUBLIC OVERRIDES
@@ -162,6 +161,11 @@ contract MedXToken is IMedXToken, ERC20Burnable, Ownable2Step, ReentrancyGuard {
         else super._update(from, to, value);
     }
 
+    // emit Approval event on transferFrom and burnFrom operations
+    function _approve(address owner, address spender, uint256 value, bool) internal virtual override(ERC20) {
+        super._approve(owner, spender, value, true);
+    }
+
     // #endregion
 
     function _collectFee(address transferFrom, address transferTo, address feeFrom, uint256 feeValue) private {
@@ -197,6 +201,7 @@ contract MedXToken is IMedXToken, ERC20Burnable, Ownable2Step, ReentrancyGuard {
         ) {
             return (true, amounts[1]);
         } catch (bytes memory reason) {
+            // event is emitted if call reverted, so reentrancy is not possible here
             // slither-disable-next-line reentrancy-events
             emit FeeSwapFailed(value, reason);
             return (false, 0);
