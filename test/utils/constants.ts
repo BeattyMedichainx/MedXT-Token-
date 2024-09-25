@@ -3,3 +3,5 @@ export const ZERO_BYTES = "0x000000000000000000000000000000000000000000000000000
 
 export const ZERO_BN = 0n;
 export const ONE_BN = 1n;
+
+export const ONE_ETHER = 10n ** 18n;

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.24;
+pragma solidity =0.8.24;
 
 library UnsafeMath {
     function unsafeAdd(uint256 a, uint256 b) internal pure returns (uint256) {

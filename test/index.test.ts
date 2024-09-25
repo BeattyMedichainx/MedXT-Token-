@@ -1,2 +1,2 @@
-// require("./<NAME_CONTRACT_FIRST>/index.test");
-// require("./<NAME_CONTRACT_SECOND>/index.test");
+require("./MedXToken/index.test");
+require("./CliffAndVesting/index.test");

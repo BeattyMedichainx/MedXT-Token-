@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.24;
+pragma solidity =0.8.24;
 
 import {Ownable2Step, Ownable} from "@openzeppelin/contracts/access/Ownable2Step.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -15,7 +15,8 @@ contract CliffAndVesting is ICliffAndVesting, Ownable2Step {
     using SafeERC20 for IERC20;
 
     /// @dev used to prevent overflow in claim method
-    uint256 private constant MAX_RESERVE_AMOUNT = type(uint256).max / 1e18;
+    /// @dev equals `type(uint256).max / 1e18`
+    uint256 private constant MAX_RESERVE_AMOUNT = 115792089237316195423570985008687907853269984665640564039457;
 
     bytes32 private immutable vestingId;
     /// @inheritdoc ICliffAndVesting
@@ -83,9 +84,11 @@ contract CliffAndVesting is ICliffAndVesting, Ownable2Step {
         IERC20 _token
     ) Ownable(msg.sender) {
         if (uint256(_vestingId >> 0xf8) >= 32) revert InvalidConfig();
-        if (_periodSize == 0 || _periodSize > 31104000) revert InvalidConfig(); // period size should be lte 12*30 days
+        if (_periodSize == 0 || _periodSize > 360 days) revert InvalidConfig(); // period size should be lte 12*30 days
         if (_initialReleaseX18 > 1e18) revert InvalidConfig();
         if (_vesting == 0 && _initialReleaseX18 != 1e18) revert InvalidConfig();
+        if (_initialReleaseX18 == 1e18 && _vesting > 0) revert InvalidConfig();
+        if (address(_token) == address(0)) revert InvalidConfig();
         if (_vesting > 120) revert InvalidConfig(); // to prevent overflow in claim method
         vestingId = _vestingId;
         periodSize = _periodSize;
@@ -164,9 +167,11 @@ contract CliffAndVesting is ICliffAndVesting, Ownable2Step {
         bool byOwner
     ) private returns (uint256 claimedAmount) {
         (uint256 claimAmount, uint256 transferAmount) = _claimableAmount(account, passedPeriods, totalPeriods);
-        _accountReserve[account].claimedAmount = claimAmount;
-        emit TokensClaimed(account, byOwner, claimAmount, transferAmount);
-        token.safeTransfer(account, transferAmount);
+        if (transferAmount != 0) {
+            _accountReserve[account].claimedAmount = claimAmount;
+            emit TokensClaimed(account, byOwner, claimAmount, transferAmount);
+            token.safeTransfer(account, transferAmount);
+        }
         return transferAmount;
     }
 

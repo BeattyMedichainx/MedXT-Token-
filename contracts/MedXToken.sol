@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.24;
+pragma solidity =0.8.24;
 
 import {Ownable, Ownable2Step} from "@openzeppelin/contracts/access/Ownable2Step.sol";
 import {ERC20, ERC20Burnable} from "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
@@ -24,6 +24,9 @@ contract MedXToken is IMedXToken, ERC20Burnable, Ownable2Step, ReentrancyGuard {
 
     /// @inheritdoc IMedXToken
     address public immutable weth;
+
+    /// @inheritdoc IMedXToken
+    address public immutable wethUniV2Pair;
 
     /// @inheritdoc IMedXToken
     IUniswapV2Router02 public immutable uniV2Router;
@@ -64,9 +67,10 @@ contract MedXToken is IMedXToken, ERC20Burnable, Ownable2Step, ReentrancyGuard {
         weth = _uniV2Router.WETH();
         IUniswapV2Factory factory = IUniswapV2Factory(_uniV2Router.factory());
         address self = address(this);
-        address wethUniV2Pair = factory.createPair(self, weth);
+        address _wethUniV2Pair = factory.createPair(self, weth);
+        wethUniV2Pair = _wethUniV2Pair;
         address usdtUniV2Pair = factory.createPair(self, usdt);
-        _updateTaxedList(wethUniV2Pair, true);
+        _updateTaxedList(_wethUniV2Pair, true);
         _updateTaxedList(usdtUniV2Pair, true);
         _approve(self, address(_uniV2Router), type(uint256).max);
     }
@@ -153,7 +157,7 @@ contract MedXToken is IMedXToken, ERC20Burnable, Ownable2Step, ReentrancyGuard {
     function _update(address from, address to, uint256 value) internal override(ERC20) {
         if (blacklisted[from]) revert Blacklisted(from);
         if (blacklisted[to]) revert Blacklisted(to);
-        if (!feeEnabled || whitelisted[from] || whitelisted[to] || from == address(this) || to == address(this)) {
+        if (!feeEnabled || whitelisted[from] || whitelisted[to] || from == address(this)) {
             return super._update(from, to, value);
         }
         if (applyTax[to]) _updateWithSellFee(from, to, value);
@@ -169,8 +173,9 @@ contract MedXToken is IMedXToken, ERC20Burnable, Ownable2Step, ReentrancyGuard {
     // #endregion
 
     function _collectFee(address transferFrom, address transferTo, address feeFrom, uint256 feeValue) private {
-        super._update(feeFrom, feeReceiver, feeValue);
-        emit FeeTokenCollected(transferFrom, transferTo, feeReceiver, feeValue);
+        address _feeReceiver = feeReceiver;
+        super._update(feeFrom, _feeReceiver, feeValue);
+        emit FeeTokenCollected(transferFrom, transferTo, _feeReceiver, feeValue);
     }
 
     function _updateWithSellFee(address from, address to, uint256 value) private {
@@ -180,6 +185,7 @@ contract MedXToken is IMedXToken, ERC20Burnable, Ownable2Step, ReentrancyGuard {
         super._update(from, to, value);
     }
 
+    // has nonReentrant modifier
     // slither-disable-next-line reentrancy-no-eth
     function _updateWithBuyFee(address from, address to, uint256 value) private nonReentrant {
         uint256 tokenFee = (value * BUY_FEE_PERCENT) / 100;
@@ -196,7 +202,7 @@ contract MedXToken is IMedXToken, ERC20Burnable, Ownable2Step, ReentrancyGuard {
         address[] memory path = new address[](2);
         path[0] = address(this);
         path[1] = weth;
-        try uniV2Router.swapExactTokensForETH(value, 0, path, feeReceiver, block.timestamp) returns (
+        try uniV2Router.swapExactTokensForETH(value, 1e-6 ether, path, feeReceiver, block.timestamp) returns (
             uint256[] memory amounts
         ) {
             return (true, amounts[1]);
@@ -217,27 +223,31 @@ contract MedXToken is IMedXToken, ERC20Burnable, Ownable2Step, ReentrancyGuard {
     }
 
     function _setFeeReceiver(address payable newFeeReceiver) private returns (bool changed) {
-        if (feeReceiver == newFeeReceiver) return false;
+        address prevFeeReceiver = feeReceiver;
+        if (prevFeeReceiver == newFeeReceiver) return false;
         if (newFeeReceiver == address(0) && feeEnabled) revert InvalidFeeReceiver();
-        emit FeeReceiverUpdated(feeReceiver, newFeeReceiver);
+        emit FeeReceiverUpdated(prevFeeReceiver, newFeeReceiver);
         feeReceiver = newFeeReceiver;
         return true;
     }
 
     function _updateWhitelist(address account, bool whitelist) private {
         if (whitelisted[account] == whitelist) return;
+        if (applyTax[account]) revert InvalidWhitelistedAccount(account);
         whitelisted[account] = whitelist;
         emit WhitelistUpdated(account, whitelist);
     }
 
     function _updateBlacklist(address account, bool blacklist) private {
         if (blacklisted[account] == blacklist) return;
+        if (account == address(this) || account == wethUniV2Pair) revert InvalidBlacklistedAccount(account);
         blacklisted[account] = blacklist;
         emit BlacklistUpdated(account, blacklist);
     }
 
     function _updateTaxedList(address account, bool taxed) private {
         if (applyTax[account] == taxed) return;
+        if (taxed) _updateWhitelist(account, false);
         applyTax[account] = taxed;
         emit TaxedListUpdated(account, taxed);
     }
@@ -249,8 +259,9 @@ contract MedXToken is IMedXToken, ERC20Burnable, Ownable2Step, ReentrancyGuard {
     }
 
     function _setAdmin(address newAdmin) private returns (bool changed) {
-        if (admin == newAdmin) return false;
-        emit AdminUpdated(admin, newAdmin);
+        address prevAdmin = admin;
+        if (prevAdmin == newAdmin) return false;
+        emit AdminUpdated(prevAdmin, newAdmin);
         admin = newAdmin;
         return true;
     }

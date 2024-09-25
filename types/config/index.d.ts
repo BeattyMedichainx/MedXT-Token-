@@ -27,8 +27,8 @@ declare module "config" {
   }
 
   export const DEPLOY: {
-    readonly UNISWAP_V2_ROUTER: string | null;
-    readonly USDT_ADDRESS: string | null;
+    readonly UNISWAP_V2_ROUTER: string;
+    readonly USDT_ADDRESS: string;
     readonly MEDX_TOKEN: {
       readonly ADDRESS: string | null;
       readonly OWNER: string | null;

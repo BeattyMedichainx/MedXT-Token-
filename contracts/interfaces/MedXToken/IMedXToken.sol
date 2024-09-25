@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.24;
+pragma solidity =0.8.24;
 
 import {IUniswapV2Router02} from "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol";
 import {IMedXTokenEvents} from "./IMedXTokenEvents.sol";
@@ -24,6 +24,9 @@ interface IMedXToken is IMedXTokenEvents, IMedXTokenErrors {
 
     /// @return weth The address of the wrapped ETH contract
     function weth() external view returns (address);
+
+    /// @return wethUniV2Pair The address of the [MEDX<=>WETH] Uniswap V2 pair
+    function wethUniV2Pair() external view returns (address);
 
     /// @return uniV2Router The address of the Uniswap V2 router (Router02)
     function uniV2Router() external view returns (IUniswapV2Router02);
