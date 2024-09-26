@@ -9,6 +9,9 @@ interface IMedXTokenEvents {
     /// @param newAdmin The address of the new admin
     event AdminUpdated(address indexed previousAdmin, address indexed newAdmin);
 
+    /// @notice Emitted when trading by non-whitelisted accounts are enabled
+    event TradingEnabled();
+
     // #region FEE EVENTS
 
     /// @notice Emitted when the fee feature is toggled

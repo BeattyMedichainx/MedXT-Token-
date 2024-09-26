@@ -22,6 +22,12 @@ interface IMedXToken is IMedXTokenEvents, IMedXTokenErrors {
     // solhint-enable func-name-mixedcase
     // #endregion
 
+    /// @dev When contract is deployed, trading on [MedX<=>USDT] and [MedX<=>WETH] Uniswap V2 pairs are disabled
+    /// @dev This is used to prevent sniping on release
+    /// @dev Trading is always enabled for whitelisted accounts
+    /// @return tradingEnableTime Timestamp when trading becomes enabled
+    function tradingEnableTime() external view returns (uint256);
+
     /// @return weth The address of the wrapped ETH contract
     function weth() external view returns (address);
 
@@ -30,6 +36,10 @@ interface IMedXToken is IMedXTokenEvents, IMedXTokenErrors {
 
     /// @return uniV2Router The address of the Uniswap V2 router (Router02)
     function uniV2Router() external view returns (IUniswapV2Router02);
+
+    /// @dev see: IMedXToken#tradingEnableTime
+    /// @return tradingEnabled Equals `true` if trading is enabled
+    function tradingEnabled() external view returns (bool);
 
     /// @return feeEnabled Equals `true` if the fee feature is enabled, `false` otherwise
     function feeEnabled() external view returns (bool);

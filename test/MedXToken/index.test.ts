@@ -8,4 +8,5 @@ describe("MedXToken", () => {
   require("./MedXToken.updateFeeReceiver.test");
   require("./MedXToken.updateList.test");
   require("./MedXToken._update.test");
+  require("./MedXToken.disabledTrading.test");
 });

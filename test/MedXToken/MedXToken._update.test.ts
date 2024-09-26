@@ -374,10 +374,10 @@ describe("Transfer logic overrides", () => {
     after(async () => contract.updateWhitelist([user1], []));
     let receipt: ContractTransactionReceipt | null = null;
     it("should succeed", async () => {
-      const deadlint = await getDeadline();
+      const deadline = await getDeadline();
       const response = await uniV2Router
         .connect(user1)
-        .swapExactTokensForTokensSupportingFeeOnTransferTokens(AMOUNT_IN, 0, [contract, usdt], user2, deadlint);
+        .swapExactTokensForTokensSupportingFeeOnTransferTokens(AMOUNT_IN, 0, [contract, usdt], user2, deadline);
       receipt = await response.wait();
       assert(receipt);
     });

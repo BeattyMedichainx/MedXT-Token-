@@ -23,6 +23,9 @@ contract MedXToken is IMedXToken, ERC20Burnable, Ownable2Step, ReentrancyGuard {
     uint256 public constant SELL_FEE_PERCENT = 3;
 
     /// @inheritdoc IMedXToken
+    uint256 public immutable tradingEnableTime;
+
+    /// @inheritdoc IMedXToken
     address public immutable weth;
 
     /// @inheritdoc IMedXToken
@@ -30,6 +33,12 @@ contract MedXToken is IMedXToken, ERC20Burnable, Ownable2Step, ReentrancyGuard {
 
     /// @inheritdoc IMedXToken
     IUniswapV2Router02 public immutable uniV2Router;
+
+    bool private _tradingEnabled;
+    /// @inheritdoc IMedXToken
+    function tradingEnabled() external view returns (bool) {
+        return _tradingEnabled || tradingEnableTime <= block.timestamp;
+    }
 
     /// @inheritdoc IMedXToken
     bool public feeEnabled;
@@ -56,7 +65,8 @@ contract MedXToken is IMedXToken, ERC20Burnable, Ownable2Step, ReentrancyGuard {
         address _owner,
         address payable _feeReceiver,
         IUniswapV2Router02 _uniV2Router,
-        address usdt
+        address usdt,
+        uint256 _tradingEnableTime
     ) ERC20("MedXT", "$MedXT") Ownable(_owner) {
         address admin_ = msg.sender;
         _mint(admin_, 25e9 * 1e18);
@@ -64,6 +74,12 @@ contract MedXToken is IMedXToken, ERC20Burnable, Ownable2Step, ReentrancyGuard {
         _setFeeReceiver(_feeReceiver);
         _toggleFee(true);
         uniV2Router = _uniV2Router;
+        tradingEnableTime = _tradingEnableTime;
+
+        // `_tradingIsEnabled()` is called to set `tradingEnabled` variable
+        // and emit `TradingEnabled` event if `_tradingEnableTime` lte `block.number`
+        _tradingIsEnabled();
+
         weth = _uniV2Router.WETH();
         IUniswapV2Factory factory = IUniswapV2Factory(_uniV2Router.factory());
         address self = address(this);
@@ -178,7 +194,7 @@ contract MedXToken is IMedXToken, ERC20Burnable, Ownable2Step, ReentrancyGuard {
         emit FeeTokenCollected(transferFrom, transferTo, _feeReceiver, feeValue);
     }
 
-    function _updateWithSellFee(address from, address to, uint256 value) private {
+    function _updateWithSellFee(address from, address to, uint256 value) private onlyEnabledTrading {
         uint256 fee = (value * SELL_FEE_PERCENT) / 100;
         value = value.unsafeSub(fee);
         _collectFee(from, to, from, fee);
@@ -187,7 +203,7 @@ contract MedXToken is IMedXToken, ERC20Burnable, Ownable2Step, ReentrancyGuard {
 
     // has nonReentrant modifier
     // slither-disable-next-line reentrancy-no-eth
-    function _updateWithBuyFee(address from, address to, uint256 value) private nonReentrant {
+    function _updateWithBuyFee(address from, address to, uint256 value) private nonReentrant onlyEnabledTrading {
         uint256 tokenFee = (value * BUY_FEE_PERCENT) / 100;
         value = value.unsafeSub(tokenFee);
         address self = address(this);
@@ -266,6 +282,15 @@ contract MedXToken is IMedXToken, ERC20Burnable, Ownable2Step, ReentrancyGuard {
         return true;
     }
 
+    /// @dev Is not a view function, because it enables fee using cache-variable `_tradingEnabled`
+    function _tradingIsEnabled() private returns (bool) {
+        if (_tradingEnabled) return true;
+        if (tradingEnableTime > block.timestamp) return false;
+        _tradingEnabled = true;
+        emit TradingEnabled();
+        return true;
+    }
+
     modifier onlyOwnerOrAdmin() {
         address caller = msg.sender;
         if (caller != owner() && caller != admin) revert OwnerOrAdminUnauthorizedAccount(caller);
@@ -275,6 +300,11 @@ contract MedXToken is IMedXToken, ERC20Burnable, Ownable2Step, ReentrancyGuard {
     modifier onlyBurner() {
         address caller = msg.sender;
         if (!canBurn[caller]) revert BurnerUnauthorizedAccount(caller);
+        _;
+    }
+
+    modifier onlyEnabledTrading() {
+        if (!_tradingIsEnabled()) revert TradingIsDisabled(tradingEnableTime, block.timestamp);
         _;
     }
 }

@@ -1,3 +1,4 @@
+import { time as hreTime } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import { ethers } from "hardhat";
 
@@ -38,7 +39,7 @@ describe("constructor", () => {
 
   describe("When owner is zero address", () => {
     it("should revert with OwnableInvalidOwner(0x00)", async () => {
-      await expect(factory.deploy(ZERO_ADDRESS, feeReceiver, uniV2Router, usdt))
+      await expect(factory.deploy(ZERO_ADDRESS, feeReceiver, uniV2Router, usdt, 0))
         .revertedWithCustomError(factory, "OwnableInvalidOwner")
         .withArgs(ZERO_ADDRESS);
     });
@@ -46,7 +47,7 @@ describe("constructor", () => {
 
   describe("When fee receiver is zero address", () => {
     it("should revert with InvalidFeeReceiver", async () => {
-      await expect(factory.deploy(owner, ZERO_ADDRESS, uniV2Router, usdt))
+      await expect(factory.deploy(owner, ZERO_ADDRESS, uniV2Router, usdt, 0))
         .revertedWithCustomError(factory, "InvalidFeeReceiver")
         .withArgs();
     });
@@ -58,7 +59,7 @@ describe("constructor", () => {
     let wethPair: IUniswapV2Pair | null = null;
     let usdtPair: IUniswapV2Pair | null = null;
     it("should succeed", async () => {
-      const deployedContract = await factory.deploy(owner, feeReceiver, uniV2Router, usdt);
+      const deployedContract = await factory.deploy(owner, feeReceiver, uniV2Router, usdt, 0);
       contract = deployedContract;
       txReceipt = (await deployedContract.deploymentTransaction()?.wait()) ?? null;
       assert.ok(txReceipt);
@@ -146,6 +147,73 @@ describe("constructor", () => {
     it("should emit TaxedListUpdated event for uni V2 [USDT <=> MedXT] pair", async function () {
       if (!txReceipt || !usdtPair) this.skip();
       await expect(txReceipt).emit(contract, "TaxedListUpdated").withArgs(usdtPair, true);
+    });
+  });
+
+  describe("When trading enable time lt now", () => {
+    const TRADING_ENABLE_TIME = 123n;
+    let contract: MedXToken | null = null;
+    let txReceipt: ContractTransactionReceipt | null = null;
+    before(() => assert(TRADING_ENABLE_TIME < Date.now() / 1e3));
+    it("should succeed", async () => {
+      const deployedContract = await factory.deploy(owner, feeReceiver, uniV2Router, usdt, TRADING_ENABLE_TIME);
+      contract = deployedContract;
+      txReceipt = (await deployedContract.deploymentTransaction()?.wait()) ?? null;
+      assert.ok(txReceipt);
+    });
+    it("trading enable time should be saved", async function () {
+      if (!contract) this.skip();
+      const actual = await contract.tradingEnableTime();
+      assert.strictEqual(actual, TRADING_ENABLE_TIME);
+    });
+    it("trading should be enabled", async function () {
+      if (!contract) this.skip();
+      const tradingEnabled = await contract.tradingEnabled();
+      assert.strictEqual(tradingEnabled, true);
+    });
+    it("should emit TradingEnabled event", async function () {
+      if (!contract || !txReceipt) this.skip();
+      await expect(txReceipt).emit(contract, "TradingEnabled").withArgs();
+    });
+  });
+
+  describe("When trading enable time gt now", () => {
+    let tradingEnableTime: bigint;
+    let contract: MedXToken | null = null;
+    let receipt: ContractTransactionReceipt | null = null;
+    before(async () => {
+      const latestBlock = await ethers.provider.getBlock("latest");
+      assert(latestBlock);
+      tradingEnableTime = BigInt(latestBlock.timestamp + 50); // + 50s
+    });
+    it("should succeed", async () => {
+      contract = await factory.deploy(owner, feeReceiver, uniV2Router, usdt, tradingEnableTime);
+      const deploymentTx = contract.deploymentTransaction();
+      assert(deploymentTx);
+      receipt = await deploymentTx.wait();
+      assert(receipt);
+    });
+    it("trading enable time should be saved", async function () {
+      if (!contract) this.skip();
+      const actual = await contract.tradingEnableTime();
+      assert.strictEqual(actual, tradingEnableTime);
+    });
+    it("trading should be disabled", async function () {
+      if (!contract) this.skip();
+      const tradingEnabled = await contract.tradingEnabled();
+      assert.strictEqual(tradingEnabled, false);
+    });
+    it("should not emit TradingEnabled event", async function () {
+      if (!contract || !receipt) this.skip();
+      await expect(receipt).not.emit(contract, "TradingEnabled");
+    });
+    it("trading should be enable on {tradingEnableTime}", async function () {
+      if (!contract) this.skip();
+      const current = await hreTime.latest();
+      assert(current < tradingEnableTime);
+      await hreTime.increaseTo(tradingEnableTime);
+      const tradingEnabled = await contract.tradingEnabled();
+      assert.strictEqual(tradingEnabled, true);
     });
   });
 });

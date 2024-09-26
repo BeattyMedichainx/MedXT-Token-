@@ -65,10 +65,17 @@ export async function deployMedXTokenAndReturnDependencies(
   deployer: HardhatEthersSigner,
   owner: AddressLike,
   feeReceiver: AddressLike,
+  tradingEnableTime?: number | bigint,
 ): Promise<MedXTokenDependencies & { contract: MedXToken }> {
   const dependencies = await deployMedXTokenDependencies(deployer);
   const factory = await ethers.getContractFactory("MedXToken").then((f) => f.connect(deployer));
-  const contract = await factory.deploy(owner, feeReceiver, dependencies.uniV2Router, dependencies.usdt);
+  const contract = await factory.deploy(
+    owner,
+    feeReceiver,
+    dependencies.uniV2Router,
+    dependencies.usdt,
+    tradingEnableTime ?? 0,
+  );
   return { ...dependencies, contract };
 }
 
@@ -76,7 +83,8 @@ export async function deployMedXToken(
   deployer: HardhatEthersSigner,
   owner: AddressLike,
   feeReceiver: AddressLike,
+  tradingEnableTime?: number | bigint,
 ): Promise<MedXToken> {
-  const { contract } = await deployMedXTokenAndReturnDependencies(deployer, owner, feeReceiver);
+  const { contract } = await deployMedXTokenAndReturnDependencies(deployer, owner, feeReceiver, tradingEnableTime ?? 0);
   return contract;
 }

@@ -4,6 +4,11 @@ pragma solidity =0.8.24;
 /// @title Errors of the MedX token contract
 /// @author PixelPlex Inc.
 interface IMedXTokenErrors {
+    /// @notice Indicates that trading currently is disabled for non-whitelisted accounts
+    /// @param tradingEnableTime The timestamp of trading enable
+    /// @param currentTime The current timestamp
+    error TradingIsDisabled(uint256 tradingEnableTime, uint256 currentTime);
+
     /// @notice Indicates that provided address is taxed and can not be added to the whitelist
     /// @param account Address of the account to be whitelisted
     error InvalidWhitelistedAccount(address account);
